@@ -71,10 +71,10 @@ export default function Home() {
   }
 
   function handleEnter(
-    e: React.KeyboardEvent<HTMLInputElement>,
+    e: React.KeyboardEvent<HTMLTextAreaElement>,
     id: number
   ) {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
 
       const index = tasks.findIndex(task => task.id === id);
@@ -93,10 +93,14 @@ export default function Home() {
     }
   }
 
+  function resizeTextarea(element: HTMLTextAreaElement) {
+    element.style.height = "auto";
+    element.style.height = `${element.scrollHeight}px`;
+  }
+
   return (
     <main className="paper min-h-screen px-6 py-12 sm:px-12">
       <div className="mx-auto max-w-3xl">
-
         <section>
           <input
             value={heading}
@@ -109,33 +113,38 @@ export default function Home() {
             {tasks.map(task => (
               <div
                 key={task.id}
-                className="group flex items-center gap-4"
+                className="group flex items-start gap-4"
               >
                 <input
                   type="checkbox"
                   checked={task.completed}
                   onChange={() => toggleTask(task.id)}
-                  className="paper-checkbox shrink-0"
+                  className="paper-checkbox mt-3 shrink-0"
                   aria-label="Complete task"
                 />
 
-                <input
+                <textarea
                   value={task.text}
-                  onChange={e =>
-                    updateTask(task.id, e.target.value)
-                  }
+                  onChange={e => {
+                    updateTask(task.id, e.target.value);
+                    resizeTextarea(e.target);
+                  }}
                   onKeyDown={e => handleEnter(e, task.id)}
+                  onInput={e => resizeTextarea(e.currentTarget)}
+                  onFocus={e => resizeTextarea(e.currentTarget)}
                   placeholder=" "
-                  className={`typewriter min-w-0 flex-1 border-b border-transparent bg-transparent py-2 text-base leading-relaxed outline-none focus:border-[#8c765b]/30 ${
+                  rows={1}
+                  className={`typewriter min-w-0 flex-1 resize-none overflow-hidden border-b border-transparent bg-transparent py-2 text-base leading-relaxed outline-none focus:border-[#8c765b]/30 ${
                     task.completed
                       ? "text-[#9b8c79] line-through"
                       : "text-[#453b30]"
                   }`}
+                  style={{ height: "auto" }}
                 />
 
                 <button
                   onClick={() => deleteTask(task.id)}
-                  className="text-[#a99a83] opacity-0 transition-opacity hover:text-red-700 group-hover:opacity-100"
+                  className="mt-2 text-[#a99a83] opacity-0 transition-opacity hover:text-red-700 group-hover:opacity-100"
                   aria-label="Delete line"
                 >
                   ×
@@ -151,7 +160,6 @@ export default function Home() {
             + Add another line
           </button>
         </section>
-
       </div>
     </main>
   );
